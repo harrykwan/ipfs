@@ -133,7 +133,7 @@ app.post("/ipfs", (req, res) => {
         req.body.name + "_metadata",
         {},
         function (result_metadata) {
-          res.send(result_metadata);
+          res.send(result_metadata.IpfsHash);
         }
       );
     }
