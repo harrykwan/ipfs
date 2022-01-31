@@ -125,7 +125,7 @@ app.post("/ipfs", (req, res) => {
       console.log(result_image);
       const metadata = {
         name: req.body.name,
-        description: result_image.description,
+        description: req.body.description,
         image: "https://ipfs.io/ipfs/" + result_image.IpfsHash,
       };
       pinJSONToIPFS(
