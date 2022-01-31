@@ -1,10 +1,10 @@
 require("dotenv").config();
 const pinataApiKey = process.env.pinata_apikey;
 const pinataSecretApiKey = process.env.pinata_apisecret;
-const axios = require("axios");
 const pinataSDK = require("@pinata/sdk");
 const pinata = pinataSDK(pinataApiKey, pinataSecretApiKey);
 const fs = require("fs");
+const request = require("request");
 const FormData = require("form-data");
 const path = require("path");
 const fileUpload = require("express-fileupload");
@@ -88,10 +88,56 @@ const pinJSONToIPFS = (metadata, pinataname, pinatametadata, callback) => {
     });
 };
 
+async function mint(body) {
+  // 172.26.4.74
+  // 3.38.208.52
+  const myPromise = new Promise((resolve, reject) => {
+    var options = {
+      method: "POST",
+      url: "http://3.38.208.52/mint",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    };
+    request(options, function (error, response) {
+      if (error) throw new Error(error);
+      console.log(response.body);
+      resolve(JSON.parse(response.body));
+    });
+  });
+  return myPromise;
+}
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
   // res.send("hi");
+  res.sendFile("public/index.html", { root: __dirname });
+});
+
+app.get("/mint", (req, res) => {
+  // res.send("hi");
+  res.sendFile("public/mint.html", { root: __dirname });
+});
+
+app.get("/success", (req, res) => {
+  // res.send("hi");
+  res.sendFile("public/success.html", { root: __dirname });
+});
+
+app.post("/mint", async (req, res) => {
+  // owner: "0x3E1D44802321cce6E9E7557730433c2ab5838760",
+  // metadatauri: "QmZwEo7PGHsJrfLzbCb5dm6kxBBkBJjXDWa74C1FDLTGuM",
+  // name: "harrykwantesting1",
+  const mintdata = {
+    owner: req.body.owner,
+    metadatauri: req.body.metadatauri,
+    name: req.body.name,
+  };
+  const result = await mint(mintdata);
+  res.redirect("/success?address=" + result.address);
+  // res.send(result);
 });
 
 app.post("/uploadfiletoipfs", (req, res) => {
@@ -133,7 +179,9 @@ app.post("/ipfs", (req, res) => {
         req.body.name + "_metadata",
         {},
         function (result_metadata) {
-          res.send(result_metadata.IpfsHash);
+          const ipfshash = result_metadata.IpfsHash;
+          // res.send(ipfshash);
+          res.redirect("/mint?ipfshash=" + ipfshash);
         }
       );
     }
