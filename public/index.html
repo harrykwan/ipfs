@@ -36,7 +36,7 @@
         <div class="loader"></div>
     </div>
     <div style="padding: 50px;">
-        <form action="ipfs" method="POST" enctype="multipart/form-data">
+        <form action="ipfs" method="POST" enctype="multipart/form-data" onsubmit="showloading()">
             <div class="form-group">
                 <label for="nftnameinput">NFT name</label>
                 <input required type="" class="form-control" id="nftnameinput" placeholder="My FIrst NFT" name="name">
